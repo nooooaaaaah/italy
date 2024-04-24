@@ -65,8 +65,8 @@ func main() {
 		fmt.Println("error opening connection,", err)
 		return
 	}
-	// Send a message to all guilds on startup
-	go sendMessageToAllGuilds(dg)
+	// Send a message to my guild on startup
+	go sendMessageToGuild(dg, "769609920000688188")
 
 	// Define commands that the bot can accept.
 	commands := []*discordgo.ApplicationCommand{
@@ -124,33 +124,24 @@ func main() {
 	dg.Close()
 }
 
-// sendMessageToAllGuilds sends a notification to a default or system channel in all guilds
-func sendMessageToAllGuilds(s *discordgo.Session) {
-	guilds, err := s.UserGuilds(0, "", "", false)
+func sendMessageToGuild(s *discordgo.Session, guildID string) {
+	channels, err := s.GuildChannels(guildID)
 	if err != nil {
-		fmt.Println("Failed to fetch guilds:", err)
+		fmt.Printf("Failed to fetch channels for guild %s: %v\n", guildID, err)
 		return
 	}
 
-	for _, guild := range guilds {
-		channels, err := s.GuildChannels(guild.ID)
-		if err != nil {
-			fmt.Printf("Failed to fetch channels for guild %s: %v\n", guild.ID, err)
-			continue
-		}
-
-		for _, channel := range channels {
-			if channel.Type == discordgo.ChannelTypeGuildText {
-				// Check if the bot has permissions to send messages in this channel
-				perms, err := s.State.UserChannelPermissions(s.State.User.ID, channel.ID)
-				if err == nil && perms&discordgo.PermissionSendMessages != 0 {
-					_, err := s.ChannelMessageSend(channel.ID, "Bot is now running and ready to receive commands!")
-					if err != nil {
-						fmt.Printf("Failed to send message to channel %s in guild %s: %v\n", channel.ID, guild.ID, err)
-					} else {
-						fmt.Printf("Startup message sent to channel %s in guild %s\n", channel.ID, guild.ID)
-						break // Stop after successfully sending to one channel per guild
-					}
+	for _, channel := range channels {
+		if channel.Type == discordgo.ChannelTypeGuildText {
+			// Check if the bot has permissions to send messages in this channel
+			perms, err := s.State.UserChannelPermissions(s.State.User.ID, channel.ID)
+			if err == nil && perms&discordgo.PermissionSendMessages != 0 {
+				_, err := s.ChannelMessageSend(channel.ID, "Bot is now running and ready to receive commands!")
+				if err != nil {
+					fmt.Printf("Failed to send message to channel %s in guild %s: %v\n", channel.ID, guildID, err)
+				} else {
+					fmt.Printf("Startup message sent to channel %s in guild %s\n", channel.ID, guildID)
+					break // Stop after successfully sending to one channel per guild
 				}
 			}
 		}
