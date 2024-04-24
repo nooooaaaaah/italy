@@ -1,0 +1,31 @@
+.env
+
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+
+# Output of the go build command
+/bin/
+
+# Dependency directories (remove the comment below if you want to ignore them)
+# /vendor/
+# /pkg/
+
+# Error logs
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Zed editor temporary files
+.zed/
